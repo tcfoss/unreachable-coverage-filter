@@ -1,7 +1,31 @@
 <Project>
-  <PropertyGroup>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <AnalysisMode>Recommended</AnalysisMode>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <AnalysisMode>Recommended</AnalysisMode>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Authors>Thomas C. Flanagan</Authors>
+        <Company>TcfOss</Company>
+        <PackageProjectUrl>https://github.com/tcfoss/unreachable-coverage-filter/</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/tcfoss/unreachable-coverage-filter</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <MinVerTagPrefix>v</MinVerTagPrefix>
+    </PropertyGroup>
+
+    <Target Name="OverrideVersions" AfterTargets="MinVer">
+        <PropertyGroup>
+            <!-- Update only when major version changes -->
+            <AssemblyVersion>0.1.0.0</AssemblyVersion>
+        </PropertyGroup>
+    </Target>
 </Project>
