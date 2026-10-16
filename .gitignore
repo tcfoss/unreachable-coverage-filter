@@ -1,0 +1,14 @@
+[Bb]in/
+[Oo]bj/
+
+[Tt]est[Rr]esult*/
+[Tt]est-[Rr]esult*/
+[Cc]overage[Hh]istory/
+[Cc]overage-[Hh]istory/
+[Rr]esharper[Ii]nspect[Rr]esults/
+[Rr]esharper-[Ii]nspect-[Rr]esults/
+
+*.sln.DotSettings.user
+.vscode/
+
+unreachable-coverage-filter.*.log

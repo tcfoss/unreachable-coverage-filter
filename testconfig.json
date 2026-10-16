@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/testfx/main/docs/testconfig.schema.json",
+  "platformOptions": {
+    "Coverlet": {
+      "format": "cobertura",
+      "excludeByFile": "**/*.g.cs,**/Program.cs",
+      "exclude": "[*.Tests]*",
+      "excludeByAttribute": "ExcludeFromCodeCoverage,GeneratedCode",
+      "skipAutoProps": true
+    }
+  }
+}

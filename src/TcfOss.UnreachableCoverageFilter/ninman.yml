@@ -1,0 +1,4 @@
+app_directory: tcfoss-unreachable-coverage-filter
+source_binary_name: TcfOss.UnreachableCoverageFilter
+binary_name: unreachable-coverage-filter
+target_permissions: 755

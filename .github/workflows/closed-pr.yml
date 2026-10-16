@@ -1,0 +1,99 @@
+name: Pull Request Merged
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  resolve-work-items:
+    if: github.event.pull_request.merged == true
+    uses: tcfoss/github-actions/.github/workflows/resolve-pr-work-items.yml@v1
+    permissions:
+      contents: read
+    with:
+      pull-request-description: ${{ github.event.pull_request.body }}
+      api-url: ${{ vars.ISSUETRACKER_API_URL }}
+      target-status: Done
+    secrets:
+      issuetracker-api-token: ${{ secrets.ISSUETRACKER_API_TOKEN }}
+
+  parse-version:
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') && github.base_ref == 'master'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.parse.outputs.version }}
+    steps:
+      - id: parse
+        uses: tcfoss/github-actions/.github/actions/parse-release-version@v1
+        with:
+          branch: ${{ github.head_ref }}
+
+  tag:
+    needs: parse-version
+    permissions:
+      contents: write
+    uses: tcfoss/github-actions/.github/workflows/tag-release.yml@v1
+    with:
+      version: ${{ needs.parse-version.outputs.version }}
+    secrets:
+      TAGGER_APP_CLIENT_ID: ${{ secrets.TAGGER_APP_CLIENT_ID }}
+      TAGGER_APP_PRIVATE_KEY: ${{ secrets.TAGGER_APP_PRIVATE_KEY }}
+
+  publish-cli:
+    needs: [parse-version, tag]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: refs/tags/v${{ needs.parse-version.outputs.version }}
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build and package CLI binaries
+        env:
+          VERSION: ${{ needs.parse-version.outputs.version }}
+        run: |
+          set -euo pipefail
+          for rid in linux-x64 win-x64 osx-arm64; do
+            publish_dir="publish/unreachable-coverage-filter_${rid}"
+            echo "Publishing UnreachableCoverageFilter for RID: $rid..."
+            dotnet publish src/TcfOss.UnreachableCoverageFilter/TcfOss.UnreachableCoverageFilter.csproj \
+              --configuration Release \
+              --runtime "$rid" \
+              --self-contained false \
+              -p:Version="$VERSION" \
+              --output "$publish_dir"
+
+            test -f "$publish_dir/ninman.yml"
+            tar -czf "unreachable-coverage-filter-${rid}-${VERSION}.tar.gz" -C "$publish_dir" .
+          done
+
+      - name: Upload CLI binaries artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: cli-binaries
+          path: unreachable-coverage-filter-*.tar.gz
+
+  finalize-release:
+    needs: [parse-version, tag, publish-cli, resolve-work-items]
+    if: >
+      !cancelled() &&
+      needs.publish-cli.result == 'success' &&
+      (needs.resolve-work-items.result == 'success' || needs.resolve-work-items.result == 'skipped')
+    uses: tcfoss/github-actions/.github/workflows/finalize-release.yml@v1
+    permissions:
+      contents: write
+    with:
+      version: ${{ needs.parse-version.outputs.version }}
+      api-url: ${{ vars.ISSUETRACKER_API_URL }}
+      release-status: Released
+      work-item-status: Released
+      artifact-name: cli-binaries
+      files: unreachable-coverage-filter-*.tar.gz
+    secrets:
+      issuetracker-api-token: ${{ secrets.ISSUETRACKER_API_TOKEN }}

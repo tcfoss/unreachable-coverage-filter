@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TcfOss.UnreachableCoverageFilter/TcfOss.UnreachableCoverageFilter.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/TcfOss.UnreachableCoverageFilter.Tests/TcfOss.UnreachableCoverageFilter.Tests.csproj" />
+  </Folder>
+</Solution>
