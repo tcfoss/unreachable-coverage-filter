@@ -17,6 +17,27 @@
         <PackageReference Include="Serilog.Sinks.File" />
         <PackageReference Include="System.CommandLine" />
     </ItemGroup>
+    <Target Name="GenerateBuildInfo" AfterTargets="MinVer" BeforeTargets="CoreCompile">
+        <PropertyGroup>
+            <BuildDate>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss"))</BuildDate>
+            <BuildContent>
+namespace $(RootNamespace)
+{
+    public static class BuildInfo
+    {
+        public const string Date = "$(BuildDate) UTC"%3B
+        public const string Version = "$(Version)"%3B
+        public const string InformationalVersion = "$(InformationalVersion)"%3B
+    }
+}
+            </BuildContent>
+        </PropertyGroup>
+        <WriteLinesToFile File="$(IntermediateOutputPath)BuildInfo.cs" Lines="$(BuildContent)" Overwrite="true" />
+    </Target>
+
+    <ItemGroup>
+        <Compile Include="$(IntermediateOutputPath)BuildInfo.cs" />
+    </ItemGroup>
 
     <ItemGroup Condition="'$(_IsWindowsTarget)' == 'true'">
         <None Update="ninman.win.yml" Link="ninman.yml" CopyToOutputDirectory="PreserveNewest" />
