@@ -12,6 +12,7 @@ var patterns = new Option<string[]>("--exclude-regex") { Description = "Regex ma
 var assemblies = new Option<string[]>("--assembly-directory") { Description = "Directory containing matching assemblies and portable PDBs; repeatable." };
 var sources = new Option<string[]>("--source-root") { Description = "Root for relocated source files; repeatable." };
 var dryRun = new Option<bool>("--dry-run") { Description = "Print exclusions without writing a report." };
+var logDirectory = new Option<DirectoryInfo?>("--log-directory") { Description = "Directory for log files; defaults to the current working directory." };
 var logLevel = new Option<string?>("--log-level")
 {
     Description = "Minimum log level: Trace, Debug, Information, Warning, Error, Critical, or None. Defaults to Information."
@@ -19,7 +20,7 @@ var logLevel = new Option<string?>("--log-level")
 
 var command = new RootCommand("Exclude explicitly matched uncovered guards from OpenCover line and branch coverage.")
 {
-    inputs, outputDirectory, collisionAction, patterns, assemblies, sources, dryRun, logLevel
+    inputs, outputDirectory, collisionAction, patterns, assemblies, sources, dryRun, logDirectory, logLevel
 };
 
 command.SetAction(result =>
@@ -57,7 +58,7 @@ command.SetAction(result =>
 
         var options = new FilterOptions(result.GetValue(patterns)!, result.GetValue(assemblies) ?? [], result.GetValue(sources) ?? []);
         LogLevel minimumLogLevel = ParseLogLevel(result.GetValue(logLevel));
-        ILoggerFactory loggerFactory = LoggingRegistration.CreateLoggerFactory(minimumLogLevel, out string logFilePath);
+        ILoggerFactory loggerFactory = LoggingRegistration.CreateLoggerFactory(minimumLogLevel, out string logFilePath, result.GetValue(logDirectory)?.FullName);
         using (loggerFactory)
         {
             Console.WriteLine($"Writing log to {logFilePath}");

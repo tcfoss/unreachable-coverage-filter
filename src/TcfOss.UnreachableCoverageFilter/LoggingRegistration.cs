@@ -8,9 +8,9 @@ namespace TcfOss.UnreachableCoverageFilter;
 
 public static class LoggingRegistration
 {
-    public static ILoggerFactory CreateLoggerFactory(LogLevel minimumLevel, out string logFilePath)
+    public static ILoggerFactory CreateLoggerFactory(LogLevel minimumLevel, out string logFilePath, string? logDirectory = null)
     {
-        logFilePath = Path.Combine(Environment.CurrentDirectory,
+        logFilePath = Path.Combine(Path.GetFullPath(logDirectory ?? Environment.CurrentDirectory),
             $"unreachable-coverage-filter.{DateTime.Now.ToString("yyyyMMdd_HHmmss_ffffff", CultureInfo.InvariantCulture)}.log");
 
         var configuration = new LoggerConfiguration();

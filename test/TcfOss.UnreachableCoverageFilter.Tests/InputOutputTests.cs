@@ -1,4 +1,5 @@
 using System.Xml.Linq;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace TcfOss.UnreachableCoverageFilter.Tests;
@@ -85,6 +86,40 @@ public sealed class InputOutputTests : IDisposable
 
         Assert.Throws<IOException>(() => Writer().Write(new XDocument(new XElement("new")), output, OutputCollisionAction.Error));
         Assert.Equal("<old />", File.ReadAllText(output));
+    }
+
+    [Fact]
+    public void WritesLogsToSpecifiedDirectory()
+    {
+        string logDirectory = Path.Combine(_directory, "logs", "nested");
+        string logFilePath;
+        using (ILoggerFactory factory = LoggingRegistration.CreateLoggerFactory(LogLevel.Information, out logFilePath, logDirectory))
+        {
+            factory.CreateLogger("Test").LogInformation("Log directory test");
+        }
+
+        Assert.Equal(logDirectory, Path.GetDirectoryName(logFilePath));
+        Assert.Contains("Log directory test", File.ReadAllText(logFilePath));
+    }
+
+    [Fact]
+    public void DefaultsLogsToCurrentWorkingDirectory()
+    {
+        string logFilePath;
+        using (ILoggerFactory factory = LoggingRegistration.CreateLoggerFactory(LogLevel.Information, out logFilePath))
+        {
+            factory.CreateLogger("Test").LogInformation("Default log directory test");
+        }
+
+        try
+        {
+            Assert.Equal(Environment.CurrentDirectory, Path.GetDirectoryName(logFilePath));
+            Assert.Contains("Default log directory test", File.ReadAllText(logFilePath));
+        }
+        finally
+        {
+            File.Delete(logFilePath);
+        }
     }
 
     private string ExistingOutput()
