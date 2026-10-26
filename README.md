@@ -5,7 +5,8 @@ Coverlet OpenCover reports before ReportGenerator runs. Assembly metadata and ma
 locations for branch destinations.
 
 The CLI logs to the current working directory using the name
-`unreachable-coverage-filter.TIMESTAMP.log`. Use `--log-level` with a
+`unreachable-coverage-filter.TIMESTAMP.log`. Use `--log-directory path/to/logs`
+to select a different directory, which is created when needed. Use `--log-level` with a
 logging level (`Trace`, `Debug`, `Information`, `Warning`, `Error`, `Critical`, or
 `None`); the default is `Information`.
 
